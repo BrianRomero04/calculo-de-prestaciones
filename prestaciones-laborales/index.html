@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prestaciones Laborales SV</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ENCABEZADO: aquí muestro el nombre del sistema y que ya es la versión final -->
+    <header class="topbar">
+        <div class="topbar-contenido">
+            <div class="marca">
+                <div class="logo-wrap">
+                    <img src="logo.png" alt="Logo de Prestaciones Laborales" class="logo-imagen">
+                </div>
+                <div class="marca-texto">
+                    <h1>Prestaciones Laborales</h1>
+                    <p>Calculadora laboral para El Salvador</p>
+                </div>
+            </div>
+            <div class="estado"><span class="punto"></span>Proyecto final</div>
+        </div>
+    </header>
+
+    <main class="pagina">
+        <!-- INTRODUCCIÓN: aquí explico de forma corta para qué sirve la página -->
+        <section class="hero">
+            <div>
+                <span class="etiqueta">Derecho Empresarial e Informático</span>
+                <h2>Calcula prestaciones laborales de forma sencilla</h2>
+                <p>La consulta puede hacerse de forma anónima. Solo se necesitan el salario, las fechas y los datos que correspondan al caso que quieras calcular.</p>
+            </div>
+        </section>
+
+        <div class="layout">
+            <div class="formulario">
+                <!-- BLOQUE 1: datos básicos, calendario y motivo de finalización -->
+                <section class="card" id="bloqueGeneral">
+                    <div class="card-titulo">
+                        <div class="numero">1</div>
+                        <div>
+                            <h3>Datos generales y calendario</h3>
+                            <p>La información personal es opcional y la consulta puede ser anónima.</p>
+                        </div>
+                    </div>
+
+                    <div class="anonimo-box">
+                        <label class="check-line" for="consultaAnonima">
+                            <input type="checkbox" id="consultaAnonima" checked>
+                            <span>
+                                <strong>Realizar consulta anónima</strong>
+                                <small>Si está activado, no necesitas escribir nombre, DUI, empresa ni cargo.</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="grid datos-personales" id="datosPersonales" hidden>
+                        <div class="campo campo-completo">
+                            <label for="nombre">Nombre de la persona trabajadora <span class="opcional">(opcional)</span></label>
+                            <input type="text" id="nombre" placeholder="Ej. Roberto Aguilar">
+                        </div>
+                        <div class="campo">
+                            <label for="dui">Número de DUI <span class="opcional">(opcional)</span></label>
+                            <input type="text" id="dui" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="00000000-0">
+                            <small>Si lo escribes, se revisa únicamente el formato.</small>
+                        </div>
+                        <div class="campo">
+                            <label for="empresa">Empresa o patrono <span class="opcional">(opcional)</span></label>
+                            <input type="text" id="empresa" placeholder="Ej. Empresa ABC">
+                        </div>
+                        <div class="campo">
+                            <label for="cargo">Cargo desempeñado <span class="opcional">(opcional)</span></label>
+                            <input type="text" id="cargo" placeholder="Ej. Auxiliar administrativo">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-obligatorios">
+                        <div class="campo">
+                            <label for="salario">Salario mensual</label>
+                            <div class="input-moneda">
+                                <span>$</span>
+                                <input type="number" id="salario" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="campo">
+                            <label for="fechaInicio">Fecha de ingreso</label>
+                            <input type="date" id="fechaInicio">
+                        </div>
+                        <div class="campo">
+                            <label for="fechaFin">Fecha de finalización o fecha de consulta</label>
+                            <input type="date" id="fechaFin">
+                            <small>No permite seleccionar una fecha que todavía no haya pasado.</small>
+                        </div>
+
+                        <!-- CALENDARIO: aquí muestro la antigüedad sin pedir años y meses manualmente -->
+                        <div class="calendario-resumen campo-completo" id="panelCalendario" aria-live="polite">
+                            <div class="calendario-cabecera">
+                                <span class="calendario-icono" aria-hidden="true">▦</span>
+                                <div>
+                                    <strong>Calendario laboral</strong>
+                                    <small>Las fechas se usan para calcular automáticamente la antigüedad.</small>
+                                </div>
+                            </div>
+                            <div class="calendario-metricas">
+                                <div><span>Fecha de ingreso</span><strong id="calFechaInicio">Sin seleccionar</strong></div>
+                                <div><span>Último día laborado</span><strong id="calFechaFin">Sin seleccionar</strong></div>
+                                <div class="calendario-antiguedad"><span>Tiempo de servicio</span><strong id="calAntiguedad">Selecciona ambas fechas</strong></div>
+                            </div>
+                            <p id="calNotaCierre" class="calendario-ayuda">El calendario también se utiliza para vacaciones, aguinaldo, renuncia e indemnización.</p>
+                        </div>
+
+                        <div class="campo campo-completo campo-separador">
+                            <label for="tipoCierre">Situación de la relación laboral</label>
+                            <select id="tipoCierre">
+                                <option value="solo">Consulta general / relación laboral vigente</option>
+                                <option value="renuncia">Renuncia voluntaria</option>
+                                <option value="despido">Despido injustificado</option>
+                            </select>
+                        </div>
+
+                        <div class="campo campo-completo cierre-campo" id="campoSector" hidden>
+                            <label for="sectorLaboral">Sector de la empresa</label>
+                            <select id="sectorLaboral">
+                                <option value="">Selecciona el sector</option>
+                                <option value="13.440">Comercio y servicios / industria / ingenios</option>
+                                <option value="13.227">Maquila textil y confección</option>
+                                <option value="10.035">Beneficios de café / recolección de caña</option>
+                                <option value="8.960">Agropecuario / pesca / recolección de café</option>
+                                <option value="otro">Otro salario mínimo diario</option>
+                            </select>
+                            <small>Estos valores corresponden a la tabla vigente desde junio de 2025. Para casos históricos puedes usar “Otro”.</small>
+                        </div>
+
+                        <div class="campo campo-completo cierre-campo" id="campoMinimoPersonalizado" hidden>
+                            <label for="minimoPersonalizado">Salario mínimo diario que deseas aplicar</label>
+                            <div class="input-moneda"><span>$</span><input type="number" id="minimoPersonalizado" min="0.001" step="0.001" placeholder="0.000"></div>
+                        </div>
+
+                        <!-- RENUNCIA: estos campos revisan preaviso y forma escrita -->
+                        <div class="campo cierre-campo renuncia-campo" hidden>
+                            <label for="tipoCargoRenuncia">Tipo de cargo para el preaviso</label>
+                            <select id="tipoCargoRenuncia">
+                                <option value="15">Empleado en general — 15 días</option>
+                                <option value="30">Dirección, jefatura o trabajador especializado — 30 días</option>
+                            </select>
+                        </div>
+                        <div class="campo cierre-campo renuncia-campo" hidden>
+                            <label for="dioPreaviso">¿Dio preaviso por escrito?</label>
+                            <select id="dioPreaviso">
+                                <option value="">Selecciona una opción</option>
+                                <option value="si">Sí</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="campo cierre-campo renuncia-campo" id="campoFechaPreaviso" hidden>
+                            <label for="fechaPreaviso">Fecha del preaviso</label>
+                            <input type="date" id="fechaPreaviso">
+                        </div>
+                        <div class="campo campo-completo cierre-campo renuncia-campo" hidden>
+                            <label for="renunciaFormal">¿La renuncia quedó presentada por escrito en la forma correspondiente?</label>
+                            <select id="renunciaFormal">
+                                <option value="">Selecciona una opción</option>
+                                <option value="si">Sí, fue recibida correctamente</option>
+                                <option value="mtps">Sí, se notificó por medio del MTPS porque el patrono no la recibió</option>
+                                <option value="no">No / todavía no</option>
+                            </select>
+                            <small>Si falta el preaviso o la forma escrita, la prestación por renuncia no se suma.</small>
+                        </div>
+
+                        <div class="aviso aviso-cierre campo-completo" id="avisoCierre" hidden>
+                            <div class="aviso-icono">i</div><p id="textoAvisoCierre"></p>
+                        </div>
+                    </div>
+
+                    <div class="paso-acciones">
+                        <p id="estadoGenerales" class="mensaje-paso" role="status">Completa el salario y las fechas. Los datos personales pueden quedar vacíos.</p>
+                        <div class="paso-botones">
+                            <button type="button" id="btnLimpiarGeneral" class="btn-secundario">Limpiar</button>
+                            <button type="button" id="btnContinuar" class="btn-principal">Continuar</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BLOQUE 2: horas extra y días especiales -->
+                <section class="card" id="bloqueEspeciales" hidden>
+                    <div class="card-titulo">
+                        <div class="numero">2</div>
+                        <div><h3>Horas extraordinarias y días especiales</h3><p>Registra únicamente lo que realmente se trabajó.</p></div>
+                    </div>
+
+                    <label class="check-line no-aplica" for="noAplicaEspeciales">
+                        <input type="checkbox" id="noAplicaEspeciales">
+                        <span><strong>No aplica</strong><small>No se realizaron horas extras, asuetos ni descansos semanales trabajados.</small></span>
+                    </label>
+
+                    <div id="contenidoEspeciales">
+                        <div class="horas-contenedor">
+                            <div class="tipo-horas">
+                                <div class="tipo-horas-header"><div><span class="tipo-etiqueta">Jornada ordinaria</span><h4>Día laboral normal</h4></div><span class="tipo-recargo">Recargo 100 %</span></div>
+                                <p class="tipo-descripcion">Horas realizadas después de finalizar la jornada ordinaria.</p>
+                                <div class="horas-grid">
+                                    <div class="hora-campo"><div class="hora-info"><label>Extras diurnas</label><span>Día normal</span></div><div class="contador contador-horas"><button type="button" class="menos" data-input="horasDiurnas">−</button><input type="number" id="horasDiurnas" min="0" step="0.5" value="0"><button type="button" class="mas" data-input="horasDiurnas">+</button></div></div>
+                                    <div class="hora-campo"><div class="hora-info"><label>Extras nocturnas</label><span>Incluye nocturnidad</span></div><div class="contador contador-horas"><button type="button" class="menos" data-input="horasNocturnas">−</button><input type="number" id="horasNocturnas" min="0" step="0.5" value="0"><button type="button" class="mas" data-input="horasNocturnas">+</button></div></div>
+                                </div>
+                            </div>
+                            <div class="tipo-horas">
+                                <div class="tipo-horas-header"><div><span class="tipo-etiqueta">Día especial</span><h4>Durante un asueto</h4></div><span class="tipo-recargo">Base de asueto</span></div>
+                                <p class="tipo-descripcion">Se habilita cuando marcas por lo menos un asueto trabajado.</p>
+                                <div class="horas-grid">
+                                    <div class="hora-campo"><div class="hora-info"><label>Extras diurnas</label><span>Durante asueto</span></div><div class="contador contador-horas"><button type="button" class="menos" data-input="horasAsuetoDiurnas">−</button><input type="number" id="horasAsuetoDiurnas" min="0" step="0.5" value="0" disabled><button type="button" class="mas" data-input="horasAsuetoDiurnas">+</button></div></div>
+                                    <div class="hora-campo"><div class="hora-info"><label>Extras nocturnas</label><span>Durante asueto</span></div><div class="contador contador-horas"><button type="button" class="menos" data-input="horasAsuetoNocturnas">−</button><input type="number" id="horasAsuetoNocturnas" min="0" step="0.5" value="0" disabled><button type="button" class="mas" data-input="horasAsuetoNocturnas">+</button></div></div>
+                                </div>
+                            </div>
+                            <div class="tipo-horas">
+                                <div class="tipo-horas-header"><div><span class="tipo-etiqueta">Día especial</span><h4>Durante descanso semanal</h4></div><span class="tipo-recargo">Base de descanso</span></div>
+                                <p class="tipo-descripcion">Se habilita cuando agregas un descanso semanal trabajado que no coincide con asueto.</p>
+                                <div class="horas-grid">
+                                    <div class="hora-campo"><div class="hora-info"><label>Extras diurnas</label><span>Durante descanso</span></div><div class="contador contador-horas"><button type="button" class="menos" data-input="horasDescansoDiurnas">−</button><input type="number" id="horasDescansoDiurnas" min="0" step="0.5" value="0" disabled><button type="button" class="mas" data-input="horasDescansoDiurnas">+</button></div></div>
+                                    <div class="hora-campo"><div class="hora-info"><label>Extras nocturnas</label><span>Durante descanso</span></div><div class="contador contador-horas"><button type="button" class="menos" data-input="horasDescansoNocturnas">−</button><input type="number" id="horasDescansoNocturnas" min="0" step="0.5" value="0" disabled><button type="button" class="mas" data-input="horasDescansoNocturnas">+</button></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="campo campo-separador">
+                            <label>Días de asueto laborados</label>
+                            <small class="descripcion-campo">Marca solamente los asuetos que sí fueron trabajados.</small>
+                            <div class="lista-asuetos">
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="enero1"><span>1 de enero</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="juevesSanto"><span>Jueves Santo</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="viernesSanto"><span>Viernes Santo</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="sabadoSanto"><span>Sábado Santo</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="mayo1"><span>1 de mayo</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="mayo10"><span>10 de mayo</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="junio17"><span>17 de junio</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="agosto6"><span>6 de agosto</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="septiembre15"><span>15 de septiembre</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="noviembre2"><span>2 de noviembre</span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="noviembre21"><span>21 de noviembre<small>Virgen de la Paz · San Miguel</small></span></label>
+                                <label class="asueto-item"><input type="checkbox" class="asueto-check" value="diciembre25"><span>25 de diciembre</span></label>
+                            </div>
+                        </div>
+
+                        <!-- DESCANSO: en vez de un número, aquí se agregan las fechas con calendario -->
+                        <div class="campo campo-separador">
+                            <label for="fechaDescanso">Días de descanso semanal laborados</label>
+                            <small>Agrega manualmente la fecha de cada descanso semanal que se trabajó.</small>
+                            <div class="agregar-fecha">
+                                <input type="date" id="fechaDescanso">
+                                <button type="button" id="btnAgregarDescanso" class="btn-secundario">Agregar fecha</button>
+                            </div>
+                            <div id="listaDescansos" class="chips-fechas"><span class="sin-fechas">Todavía no hay fechas agregadas.</span></div>
+                            <div class="resumen-especiales">
+                                <span>Descansos registrados: <strong id="rConteoDescansos">0</strong></span>
+                                <span>Coincidencias con asueto: <strong id="rCoincidencias">0</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="aviso aviso-horas">
+                            <div class="aviso-icono">i</div>
+                            <p>Si un descanso semanal coincide con un asueto seleccionado, el sistema evita el doble cálculo. Las horas extra de ese día deben registrarse en la sección de asueto.</p>
+                        </div>
+                        <div id="avisoCompensatorio" class="aviso-compensatorio oculto">
+                            <div class="aviso-compensatorio-icono">✓</div><div><strong>Descanso compensatorio</strong><p>Además del pago correspondiente, debe concederse el descanso compensatorio por el descanso semanal laborado.</p></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BLOQUE 3: vacaciones y aguinaldo -->
+                <section class="card" id="bloquePrestaciones" hidden>
+                    <div class="card-titulo"><div class="numero">3</div><div><h3>Vacaciones y aguinaldo</h3><p>El calendario ayuda a calcular las partes proporcionales.</p></div></div>
+                    <div class="subbloque">
+                        <div class="subbloque-titulo"><div><span class="tipo-etiqueta">Vacaciones</span><h4>Vacación proporcional</h4></div><span class="tipo-recargo">15 días + 30 %</span></div>
+                        <div class="grid">
+                            <div class="campo campo-completo">
+                                <label for="vacacionesPagadas">¿Ya gozó de sus vacaciones correspondientes a este período?</label>
+                                <select id="vacacionesPagadas">
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="si">Sí, ya las gozó</option>
+                                    <option value="no">No, todavía no las ha gozado</option>
+                                </select>
+                                <small>Si ya las gozó, no se vuelve a calcular esta prestación.</small>
+                            </div>
+
+                            <div id="preguntasBeneficiosVacacion" class="campo-completo" hidden>
+                                <div class="grid">
+                                    <div class="campo">
+                                        <label for="alojamientoVacacion">¿Según contrato recibe alojamiento?</label>
+                                        <select id="alojamientoVacacion">
+                                            <option value="">Selecciona una opción</option>
+                                            <option value="si">Sí</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                        <small>Si seleccionas Sí, se agrega automáticamente el 25 % correspondiente al alojamiento.</small>
+                                    </div>
+                                    <div class="campo">
+                                        <label for="alimentacionVacacion">¿Según contrato recibe alimentación?</label>
+                                        <select id="alimentacionVacacion">
+                                            <option value="">Selecciona una opción</option>
+                                            <option value="si">Sí</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                        <small>Si seleccionas Sí, se agrega automáticamente otro 25 % por alimentación.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="campo campo-completo"><label>Período que se tomará</label><div class="dato-solo" id="periodoVacacion">Se mostrará al completar las fechas.</div></div>
+                        </div>
+                    </div>
+
+                    <div class="subbloque">
+                        <div class="subbloque-titulo"><div><span class="tipo-etiqueta">Aguinaldo</span><h4>Aguinaldo proporcional</h4></div><span class="tipo-recargo">15 / 19 / 21 días</span></div>
+                        <div class="grid">
+                            <div class="campo">
+                                <label for="aguinaldoPagado">¿El aguinaldo de este período ya fue pagado completo?</label>
+                                <select id="aguinaldoPagado"><option value="">Selecciona una opción</option><option value="no">No</option><option value="si">Sí</option></select>
+                            </div>
+                            <div class="campo" id="campoUltimoAguinaldo">
+                                <label for="fechaUltimoAguinaldo">Fecha del último aguinaldo pagado <span class="opcional">(opcional)</span></label>
+                                <input type="date" id="fechaUltimoAguinaldo">
+                                <small>Si lo dejas vacío, se toma el inicio del empleo o el 12 de diciembre anterior, según corresponda.</small>
+                            </div>
+                            <div class="campo campo-completo"><div class="dato-solo" id="notaAguinaldo">La categoría se determinará con la antigüedad.</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BLOQUE 4: deducciones que aparecen en el formato de liquidación -->
+                <section class="card" id="bloqueDeducciones" hidden>
+                    <div class="card-titulo"><div class="numero">4</div><div><h3>Deducciones</h3><p>ISSS, AFP e ISR para completar el formato de liquidación.</p></div></div>
+                    <label class="check-line" for="aplicarDeducciones">
+                        <input type="checkbox" id="aplicarDeducciones" checked>
+                        <span><strong>Aplicar deducciones al Total 1</strong><small>ISSS 3 % con tope de $1,000, AFP 7.25 % e ISR según la tabla mensual vigente. Puedes desactivarlo para ver únicamente el total bruto.</small></span>
+                    </label>
+                    <div class="aviso"><div class="aviso-icono">i</div><p>Para el comprobante se separa la remuneración gravada de los conceptos exentos y luego se calculan las deducciones, siguiendo la estructura del modelo proporcionado por la docente.</p></div>
+                </section>
+
+                <div class="acciones" id="accionesCalculo" hidden>
+                    <button type="button" id="btnLimpiar" class="btn-secundario">Limpiar todo</button>
+                    <button type="button" id="btnCalcular" class="btn-principal">Calcular prestaciones</button>
+                </div>
+            </div>
+
+            <!-- RESULTADOS: aquí se muestra el desglose completo -->
+            <aside class="panel-resultados" id="panelResultados">
+                <div class="resultado-header"><div><span class="mini-etiqueta">Resumen</span><h3>Resultado del cálculo</h3></div><div class="calculadora-icono">$</div></div>
+                <div class="sin-calculo" id="sinCalculo"><div class="sin-calculo-icono">∑</div><h4>Aún no hay resultados</h4><p>Completa los datos necesarios y presiona Calcular prestaciones.</p></div>
+                <div class="detalle-resultados oculto" id="detalleResultados">
+                    <div class="reporte-identidad" id="resumenIdentidad">Consulta anónima</div>
+                    <div class="dato-principal"><span>Salario mensual</span><strong id="rSalarioMensual">$0.00</strong></div>
+                    <div class="separador"></div>
+                    <div class="fila"><div><span>Salario diario</span><small>Salario mensual ÷ 30</small></div><strong id="rSalarioDiario">$0.00</strong></div>
+                    <div class="fila"><div><span>Salario por hora</span><small>Salario diario ÷ 8</small></div><strong id="rHora">$0.00</strong></div>
+                    <div class="fila"><div><span>Antigüedad</span><small>Criterio comercial 30/360 usado en clase</small></div><strong id="rAntiguedad">—</strong></div>
+                    <div class="separador"></div>
+                    <div class="fila"><span>Horas extras diurnas</span><strong id="rDiurnas">$0.00</strong></div>
+                    <div class="fila"><span>Horas extras nocturnas</span><strong id="rNocturnas">$0.00</strong></div>
+                    <div class="fila"><span>Asuetos laborados</span><strong id="rAsuetos">$0.00</strong></div>
+                    <div class="fila"><span>Descansos semanales</span><strong id="rDescansos">$0.00</strong></div>
+                    <div class="fila" id="filaVacacion"><div><span>Vacación proporcional</span><small id="rDetalleVacacion">—</small></div><strong id="rVacacion">$0.00</strong></div>
+                    <div class="fila" id="filaAlojamientoVacacion" hidden><div><span>Adicional por alojamiento</span><small>25 % sobre la base de 15 días de salario</small></div><strong id="rAlojamientoVacacion">$0.00</strong></div>
+                    <div class="fila" id="filaAlimentacionVacacion" hidden><div><span>Adicional por alimentación</span><small>25 % sobre la base de 15 días de salario</small></div><strong id="rAlimentacionVacacion">$0.00</strong></div>
+                    <div class="fila"><div><span>Aguinaldo proporcional</span><small id="rDetalleAguinaldo">—</small></div><strong id="rAguinaldo">$0.00</strong></div>
+                    <div class="fila fila-cierre" id="filaCierre" hidden><div><span id="etiquetaPrestacion">Prestación por finalización</span><small id="rDetalleCierre">—</small></div><strong id="rPrestacion">$0.00</strong></div>
+                    <p class="nota-calculo" id="rNotaCierre" hidden></p>
+                    <div class="total total-bruto"><div><span>Total 1</span><small>Sumatoria antes de deducciones</small></div><strong id="rTotalBruto">$0.00</strong></div>
+                    <div class="separador"></div>
+                    <div class="fila"><div><span>ISSS</span><small>3 % · tope $1,000</small></div><strong id="rIsss">-$0.00</strong></div>
+                    <div class="fila"><div><span>AFP</span><small>7.25 %</small></div><strong id="rAfp">-$0.00</strong></div>
+                    <div class="fila"><div><span>ISR</span><small>Tabla mensual de retención</small></div><strong id="rIsr">-$0.00</strong></div>
+                    <div class="fila fila-deducciones"><div><span>Total de deducciones</span></div><strong id="rTotalDeducciones">-$0.00</strong></div>
+                    <div class="total total-neto"><div><span>Total 2</span><small>Total final después de deducciones</small></div><strong id="rTotalNeto">$0.00</strong></div>
+                    <p class="nota-calculo" id="rNotaGeneral"></p>
+                    <button type="button" id="btnExportar" class="btn-exportar">Imprimir / guardar PDF</button>
+                    <small class="ayuda-exportar">En la ventana de impresión puedes elegir “Guardar como PDF”.</small>
+                </div>
+                <div class="nota-panel"><span>Uso académico</span><p>La herramienta realiza cálculos orientativos con las fórmulas trabajadas en la materia. No guarda ni envía la información ingresada.</p></div>
+            </aside>
+        </div>
+    </main>
+
+
+
+    <!-- REPORTE PARA IMPRESIÓN: reproduce el formato entregado por la docente -->
+    <section id="reporteImpresion" class="reporte-impresion" aria-hidden="true">
+        <article class="pdf-page pdf-page-1">
+            <header class="pdf-encabezado">
+                <h1>COMPROBANTE DE LIQUIDACIÓN DE PRESTACIONES LABORALES</h1>
+                <p>República de El Salvador</p>
+            </header>
+
+            <section class="pdf-seccion">
+                <h2>I. Datos de las partes</h2>
+                <div class="pdf-partes-grid">
+                    <span class="pdf-etiqueta">Persona trabajadora</span><strong id="pdfTrabajador">CONSULTA ANÓNIMA</strong>
+                    <span class="pdf-etiqueta">Patrono</span><strong id="pdfPatrono">NO PROPORCIONADO</strong>
+
+                    <span class="pdf-etiqueta">Cargo desempeñado</span><strong id="pdfCargo">NO PROPORCIONADO</strong>
+                    <span class="pdf-etiqueta">Salario mensual</span><strong id="pdfSalario">$0.00</strong>
+
+                    <span class="pdf-etiqueta">Fecha de ingreso</span><strong id="pdfFechaIngreso">—</strong>
+                    <span class="pdf-etiqueta">Fecha de terminación</span><strong id="pdfFechaTerminacion">—</strong>
+
+                    <span class="pdf-etiqueta">Antigüedad reconocida</span><strong id="pdfAntiguedad">—</strong>
+                    <span class="pdf-etiqueta">Causa de terminación</span><strong id="pdfCausa">—</strong>
+                </div>
+            </section>
+
+            <section class="pdf-seccion">
+                <h2>II. Desglose de prestaciones liquidadas</h2>
+                <table class="pdf-tabla">
+                    <thead>
+                        <tr><th>Concepto</th><th>Base legal</th><th>Monto</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Vacación proporcional</td><td>Arts. 177 y 187 CT</td><td id="pdfVacacion">$0.00</td></tr>
+                        <tr><td>Aguinaldo proporcional</td><td>Arts. 196-198 CT</td><td id="pdfAguinaldo">$0.00</td></tr>
+                        <tr><td id="pdfConceptoCierre">Indemnización / prestación por finalización</td><td id="pdfBaseCierre">Según corresponda</td><td id="pdfPrestacion">$0.00</td></tr>
+                        <tr><td>Horas extras diurnas</td><td>Art. 169 CT</td><td id="pdfDiurnas">$0.00</td></tr>
+                        <tr><td>Horas extras nocturnas</td><td>Arts. 168 y 169 CT</td><td id="pdfNocturnas">$0.00</td></tr>
+                        <tr><td>Días de asueto laborados</td><td>Art. 192 CT</td><td id="pdfAsuetos">$0.00</td></tr>
+                        <tr><td>Días de descanso semanal laborados</td><td>Arts. 175 y 176 CT</td><td id="pdfDescansos">$0.00</td></tr>
+                    </tbody>
+                    <tfoot>
+                        <tr><th colspan="2">TOTAL DEVENGADO (BRUTO)</th><th id="pdfTotalBruto">$0.00</th></tr>
+                    </tfoot>
+                </table>
+            </section>
+
+            <section class="pdf-seccion pdf-deducciones">
+                <h2>III. Deducciones de ley y neto a pagar</h2>
+                <p class="pdf-explicacion">
+                    Remuneración gravada: <strong id="pdfGravada">$0.00</strong>.
+                    Monto exento de ISR y de cotizaciones: <strong id="pdfExento">$0.00</strong>
+                    <span id="pdfTextoExento">(aguinaldo y prestación de terminación, cuando corresponda).</span>
+                </p>
+
+                <table class="pdf-tabla pdf-tabla-deducciones">
+                    <tbody>
+                        <tr><td>Cotización ISSS (trabajador)</td><td>Reglamento del ISSS, Art. 29</td><td id="pdfIsss">-$0.00</td></tr>
+                        <tr><td>Cotización AFP (trabajador)</td><td>Ley del Sistema de Ahorro para Pensiones</td><td id="pdfAfp">-$0.00</td></tr>
+                        <tr><td>Retención de ISR</td><td>Art. 37 Ley de ISR</td><td id="pdfIsr">-$0.00</td></tr>
+                        <tr class="pdf-total-deducciones"><th colspan="2">Total de deducciones</th><th id="pdfTotalDeducciones">-$0.00</th></tr>
+                    </tbody>
+                </table>
+
+                <div class="pdf-neto">
+                    <strong>MONTO NETO A PAGAR</strong>
+                    <strong id="pdfNeto">$0.00</strong>
+                </div>
+
+                <div class="pdf-letras">
+                    <span>Monto neto en letras</span>
+                    <strong id="pdfNetoLetras">CERO 00/100 DÓLARES DE LOS ESTADOS UNIDOS DE AMÉRICA</strong>
+                </div>
+            </section>
+
+            <footer class="pdf-footer">
+                <span id="pdfFechaGeneracion1">Generado el —</span><span>1 / 2</span>
+            </footer>
+        </article>
+
+        <article class="pdf-page pdf-page-2">
+            <header class="pdf-encabezado">
+                <h1>COMPROBANTE DE LIQUIDACIÓN DE PRESTACIONES LABORALES</h1>
+                <p>República de El Salvador</p>
+            </header>
+
+            <section class="pdf-seccion pdf-declaracion">
+                <h2>IV. Declaración</h2>
+                <p>
+                    La persona trabajadora <strong id="pdfDeclaracionNombre">CONSULTA ANÓNIMA</strong>
+                    declara haber recibido el detalle de las prestaciones económicas que anteceden, calculadas conforme al
+                    Código de Trabajo de El Salvador, así como el desglose de las retenciones de ley aplicadas y el monto neto
+                    resultante. Este comprobante se suscribe en la fecha que se indica al pie de las firmas.
+                </p>
+
+                <div class="pdf-firmas">
+                    <div class="pdf-firma">
+                        <div class="pdf-linea-firma"></div>
+                        <strong>Persona trabajadora</strong>
+                        <p>Nombre: ______________________________</p>
+                        <p>DUI: _________________________________</p>
+                        <p>Fecha: _______________________________</p>
+                    </div>
+                    <div class="pdf-firma">
+                        <div class="pdf-linea-firma"></div>
+                        <strong>Patrono o representante legal</strong>
+                        <p>Nombre: ______________________________</p>
+                        <p>DUI: _________________________________</p>
+                        <p>Fecha: _______________________________</p>
+                    </div>
+                </div>
+
+                <div class="pdf-advertencia">
+                    <strong>Advertencia legal</strong>
+                    <p>
+                        Este documento es un comprobante informativo del cálculo de prestaciones y NO constituye el finiquito laboral.
+                        Conforme al Art. 402 inciso 2 del Código de Trabajo, la renuncia, la terminación por mutuo consentimiento o el
+                        recibo de pago de prestaciones por despido sin causa legal solo tienen valor probatorio si constan en hojas
+                        extendidas por la Dirección General de Inspección de Trabajo o por los jueces con competencia en materia laboral,
+                        utilizadas dentro de los diez días siguientes a su expedición, o bien en documento privado autenticado ante notario.
+                        Se recomienda asesoría legal profesional antes de suscribir cualquier finiquito.
+                    </p>
+                </div>
+            </section>
+
+            <footer class="pdf-footer">
+                <span id="pdfFechaGeneracion2">Generado el —</span><span>2 / 2</span>
+            </footer>
+        </article>
+    </section>
+
+
+    <div id="toast" class="toast">Cálculo realizado correctamente</div>
+    <script src="script.js"></script>
+    <footer style="
+    width: 100%;
+    margin-top: 60px;
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: #16324f;
+    border-top: 3px solid #1aa385;
+    color: rgba(255,255,255,0.70);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    box-sizing: border-box;
+">
+    <span>
+        Made by
+        <strong style="
+            color: #ffffff;
+            font-weight: 700;
+            margin-left: 4px;
+        ">
+            Superingenieritos
+        </strong>
+    </span>
+</footer>
+</body>
+</html>
